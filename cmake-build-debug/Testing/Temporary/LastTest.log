@@ -1,0 +1,37 @@
+Start testing: Apr 23 19:44 W. Europe Daylight Time
+----------------------------------------------------------
+1/1 Testing: IniParserTests
+1/1 Test: IniParserTests
+Command: "C:/Users/Proton/CLionProjects/IniParser/cmake-build-debug/run_tests.exe"
+Directory: C:/Users/Proton/CLionProjects/IniParser/cmake-build-debug
+"IniParserTests" start time: Apr 23 19:44 W. Europe Daylight Time
+Output:
+----------------------------------------------------------
+Running main() from C:/Users/Proton/CLionProjects/IniParser/googletest/googletest/src/gtest_main.cc
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from IniParserTest
+[ RUN      ] IniParserTest.LoadFile
+File di test creato: test_simple.ini
+[       OK ] IniParserTest.LoadFile (9 ms)
+[ RUN      ] IniParserTest.ReadValues
+File di test creato: test_read.ini
+[       OK ] IniParserTest.ReadValues (1 ms)
+[ RUN      ] IniParserTest.SetValues
+[       OK ] IniParserTest.SetValues (0 ms)
+[ RUN      ] IniParserTest.NonExistentValues
+[       OK ] IniParserTest.NonExistentValues (0 ms)
+[----------] 4 tests from IniParserTest (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (11 ms total)
+[  PASSED  ] 4 tests.
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"IniParserTests" end time: Apr 23 19:44 W. Europe Daylight Time
+"IniParserTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 23 19:44 W. Europe Daylight Time
