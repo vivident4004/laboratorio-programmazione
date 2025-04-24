@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(lab_programmazione VERSION 1.0.0 LANGUAGES CXX) # Unico project call
+project(lab_programmazione VERSION 1.0.0 LANGUAGES CXX)
 
 add_subdirectory(test)
 
@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-## Aggiungi i flag di compilazione
+## Direttive di compilazione
 #if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 #    add_compile_options(-Wall -Wextra -Wpedantic -g)
 #else()
