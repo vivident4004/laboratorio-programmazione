@@ -20,6 +20,7 @@ int main() {
         std::cout << "Versione: " << parser.getValue("general", "version") << std::endl;
         std::cout << "Host: " << parser.getValue("network", "host") << std::endl;
         std::cout << "Porta: " << parser.getValue("network", "port") << std::endl;
+        std::cout << parser.print();
 
         // Prova a leggere un valore inesistente
         std::cout << "Valore inesistente (dovrebbe essere vuoto): '" << parser.getValue("nonexistent", "key") << "'" << std::endl;

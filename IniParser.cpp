@@ -114,3 +114,25 @@ std::string IniParser::getValue(const std::string& section, const std::string& k
 void IniParser::setValue(const std::string& section, const std::string& key, const std::string& value) {
     data[section][key] = value;
 }
+
+std::string IniParser::print(bool print_comments /* ignored in this block */) const
+{
+    std::string output;
+
+    // Itera attraverso le sezioni (le mappe iterano in ordine alfabetico per chiave, che sono i nomi sezione in minuscolo)
+    for (const auto& sectionPair : data) // sectionPair.first = nome sezione (minuscolo), sectionPair.second = mappa chiavi/valori
+    {
+        // Stampa il nome della sezione tra parentesi quadre
+        output += '[' + sectionPair.first + ']' + '\n';
+
+        // Itera attraverso le coppie chiave=valore all'interno della sezione
+        for (const auto& keyPair : sectionPair.second) // keyPair.first = chiave (minuscolo), keyPair.second = valore
+        {
+            // Stampa la coppia chiave=valore
+            output += keyPair.first + '=' + keyPair.second + '\n';
+        }
+        output += '\n'; // Aggiunge una linea vuota tra le sezioni per leggibilità
+    }
+
+    return output;
+}

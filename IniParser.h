@@ -36,13 +36,11 @@ public:
     std::vector<std::string> hasKey(const std::string& key) const; // Cerca chiave in tutte le sezioni
     bool deleteKey(const std::string& section, const std::string& key);
 
+    // ancora da implementare
     // void addSection(const std::string& section);
     // bool hasSection(const std::string& section) const;
     // bool deleteSection(const std::string& section);
-    // bool setSectionComment(const std::string& section, const std::string& comment);
-    // bool setKeyComment(const std::string& section, const std::string& key, const std::string& comment);
-    // std::string getSectionComment(const std::string& section) const;
-    // std::string getKeyComment(const std::string& section, const std::string& key) const;
+
 
     std::string print(bool print_comments = true) const;
 
