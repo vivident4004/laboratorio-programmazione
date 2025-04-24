@@ -1,8 +1,29 @@
+//
+// Created by vivident4004 on 10/04/2025.
+//
+#include <algorithm>
+
 #include "IniParser.h"
 #include <fstream>
 #include <iostream>
+#include <cctype> // Per ::tolower
 
-bool IniParser::loadFile(const std::string& filename) {
+IniParser::IniParser() {
+    try {
+        load(filename);
+    } catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+}
+
+std::string IniParser::toLower(const std::string& str)
+{
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    return lower;
+}
+
+bool IniParser::load(const std::string& filename) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -10,7 +31,7 @@ bool IniParser::loadFile(const std::string& filename) {
         return false;
     }
 
-    // Resetta i dati precedenti
+    // Pulisco eventuali dati esistenti
     data.clear();
 
     std::string line;
@@ -42,7 +63,9 @@ bool IniParser::loadFile(const std::string& filename) {
             std::string key = line.substr(0, equalPos);
             std::string value = line.substr(equalPos + 1);
 
-            data[currentSection][key] = value;
+            // Converti la chiave in minuscolo per l'archiviazione
+            std::string lowerKey = toLower(key);
+            data[currentSection][lowerKey] = value;
         }
     }
 
@@ -50,14 +73,38 @@ bool IniParser::loadFile(const std::string& filename) {
     return true;
 }
 
-std::string IniParser::getValue(const std::string& section, const std::string& key) const {
+bool IniParser::save(const std::string& filename) const {
+    std::ofstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << "Impossibile aprire il file: " << filename << std::endl;
+        return false;
+    }
+
+    for (const auto& sectionPair : data) // sectionPair.first è il nome sezione (minuscolo), sectionPair.second è la mappa chiavi/valori
+    {
+        // Stampa il nome della sezione
+        file << '[' << sectionPair.first << ']' << std::endl;
+
+        for (const auto& keyPair : sectionPair.second) // keyPair.first è la chiave (minuscolo), keyPair.second è il valore
+        {
+            // Stampa chiave=valore
+            file << keyPair.first << '=' << keyPair.second << std::endl;
+        }
+        // Aggiungi una linea vuota tra le sezioni per leggibilità
+        file << std::endl;
+    }
+
+    file.close();
+    return true;
+}
+
+std::string IniParser::getValue(const std::string& section, const std::string& key) {
     // Controlla se la sezione esiste
-    auto sectionIt = data.find(section);
-    if (sectionIt != data.end()) {
+    if (data.find(section) != data.end()) {
         // Controlla se la chiave esiste nella sezione
-        auto keyIt = sectionIt->second.find(key);
-        if (keyIt != sectionIt->second.end()) {
-            return keyIt->second;
+        if (data[section].find(key) != data[section].end()) {
+            return data[section][key];
         }
     }
 

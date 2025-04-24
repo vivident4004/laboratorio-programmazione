@@ -1,23 +1,20 @@
 cmake_minimum_required(VERSION 3.31)
-project(IniParser)
+project(lab_programmazione VERSION 1.0.0 LANGUAGES CXX) # Unico project call
+
+add_subdirectory(test)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Libreria INI Parser
-add_library(ini_parser IniParser.cpp)
+## Aggiungi i flag di compilazione
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    add_compile_options(-Wall -Wextra -Wpedantic -g)
+#else()
+#    add_compile_options(-O3)
+#endif()
 
-# Applicazione principale
-add_executable(IniParser main.cpp)
-target_link_libraries(IniParser ini_parser)
-
-# Configurazione Google Test
-add_subdirectory(googletest)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/googletest/include)
-
-# Test
-add_executable(run_tests test.cpp)
-target_link_libraries(run_tests ini_parser gtest gtest_main)
-
-# Abilita Testing
-enable_testing()
-add_test(NAME IniParserTests COMMAND run_tests)
+set(SOURCE_FILES iniParser.cpp iniParser.h)
+add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_FILES})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}_lib)
