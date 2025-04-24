@@ -111,13 +111,26 @@ bool IniParser::hasSection(const std::string& section) const {
 }
 
 bool IniParser::hasKey(const std::string& section, const std::string& key) {
-    // TODO
-    return false;
+    auto sectionIt = data.find(toLower(section));
+
+    if (sectionIt == data.end()) {
+        return false;
+    }
+
+    return sectionIt->second.find(toLower(key)) != sectionIt->second.end();
 }
 
 std::vector<std::string> IniParser::hasKey(const std::string& key) {
-    // TODO
-    return {};
+    std::vector<std::string> sections;
+    std::string lowerKey = toLower(key);
+
+    for (const auto& sectionPair : data) {
+        if (sectionPair.second.find(lowerKey) != sectionPair.second.end()) {
+            sections.push_back(sectionPair.first);
+        }
+    }
+
+    return sections;
 }
 
 bool IniParser::deleteKey(const std::string& section, const std::string& key) {
@@ -125,7 +138,7 @@ bool IniParser::deleteKey(const std::string& section, const std::string& key) {
     return false;
 }
 
-std::string IniParser::print(bool print_comments /* ignored */) const {
+std::string IniParser::print() const {
     std::string output;
 
     for (const auto& sectionPair : data) {

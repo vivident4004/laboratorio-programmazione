@@ -26,6 +26,33 @@ int main() {
         std::cout << "La sezione 'general' esiste: " << (parser.hasSection("general") ? "Sì" : "No") << std::endl;
         std::cout << "La sezione 'inesistente' esiste: " << (parser.hasSection("inesistente") ? "Sì" : "No") << std::endl;
 
+        std::cout << "\nTest delle funzioni hasKey:" << std::endl;
+        // Test della prima versione (verifica in una sezione specifica)
+        std::cout << "La chiave 'name' esiste nella sezione 'general': "
+                  << (parser.hasKey("general", "name") ? "Sì" : "No") << std::endl;
+        std::cout << "La chiave 'inesistente' esiste nella sezione 'general': "
+                  << (parser.hasKey("general", "inesistente") ? "Sì" : "No") << std::endl;
+
+        // Test della seconda versione (cerca in tutte le sezioni)
+        std::cout << "\nRicerca della chiave 'host' in tutte le sezioni:" << std::endl;
+        std::vector<std::string> sectionsWithHost = parser.hasKey("host");
+        if (sectionsWithHost.empty()) {
+            std::cout << "La chiave 'host' non è stata trovata in nessuna sezione." << std::endl;
+        } else {
+            std::cout << "La chiave 'host' è stata trovata nelle seguenti sezioni:" << std::endl;
+            for (const auto& section : sectionsWithHost) {
+                std::cout << "- " << section << std::endl;
+            }
+        }
+
+        // Aggiungiamo una chiave duplicata in un'altra sezione per dimostrare la seconda funzione
+        parser.setValue("backup", "host", "backup.server.com");
+        std::cout << "\nDopo aver aggiunto 'host' in una seconda sezione:" << std::endl;
+        std::vector<std::string> sectionsWithHostAfter = parser.hasKey("host");
+        for (const auto& section : sectionsWithHostAfter) {
+            std::cout << "- " << section << " (valore: " << parser.getValue(section, "host") << ")" << std::endl;
+        }
+
         // Aggiungi una nuova sezione
         std::cout << "\nAggiunta di una nuova sezione..." << std::endl;
         parser.addSection("configurazione");

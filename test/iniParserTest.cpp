@@ -134,3 +134,41 @@ TEST_F(IniParserTest, SaveAndReload) {
     // Pulizia
     std::remove("temp_test_save.ini");
 }
+
+// Test per hasKey (prima versione)
+TEST_F(IniParserTest, HasKeyInSection) {
+    IniParser parser;
+    parser.load("temp_test.ini");
+
+    EXPECT_TRUE(parser.hasKey("general", "name"));
+    EXPECT_TRUE(parser.hasKey("network", "host"));
+    EXPECT_FALSE(parser.hasKey("general", "nonexistent"));
+    EXPECT_FALSE(parser.hasKey("nonexistent", "key"));
+
+    // Test case insensitivity
+    EXPECT_TRUE(parser.hasKey("GENERAL", "NAME"));
+}
+
+// Test per hasKey (seconda versione)
+TEST_F(IniParserTest, FindKeyInAllSections) {
+    IniParser parser;
+    parser.load("temp_test.ini");
+
+    // Chiave esistente in una sezione
+    std::vector<std::string> sectionsWithHost = parser.hasKey("host");
+    EXPECT_EQ(sectionsWithHost.size(), 1);
+    EXPECT_EQ(sectionsWithHost[0], "network");
+
+    // Chiave inesistente
+    std::vector<std::string> sectionsWithNonexistent = parser.hasKey("nonexistent");
+    EXPECT_TRUE(sectionsWithNonexistent.empty());
+
+    // Aggiungiamo la stessa chiave in un'altra sezione
+    parser.setValue("backup", "host", "backup.server");
+    std::vector<std::string> sectionsWithHostAfter = parser.hasKey("host");
+    EXPECT_EQ(sectionsWithHostAfter.size(), 2);
+
+    // Verifica case insensitivity
+    std::vector<std::string> sectionsWithHostUpper = parser.hasKey("HOST");
+    EXPECT_EQ(sectionsWithHostUpper.size(), 2);
+}
