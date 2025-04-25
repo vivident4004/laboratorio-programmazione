@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(lab_programmazione VERSION 1.0.0 LANGUAGES CXX)
+project(lab_programmazione VERSION 1.1.0 LANGUAGES CXX)
 
 add_subdirectory(test)
 

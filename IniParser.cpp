@@ -50,7 +50,6 @@ bool IniParser::load(const std::string& filename) {
         if (!section.empty()) {
             size_t pos = line.find('=');
             if (pos != std::string::npos) {
-                // Estrae chiave e valore, senza trim
                 std::string key = line.substr(0, pos);
                 std::string value = line.substr(pos + 1);
                 std::string lowerKey = toLower(key);
@@ -67,22 +66,23 @@ bool IniParser::load(const std::string& filename) {
 
 bool IniParser::save(const std::string& filename) const {
     std::ofstream file(filename);
-
+    // Verifica che il file sia stato aperto correttamente
     if (!file.is_open()) {
         std::cerr << "Impossibile aprire il file per la scrittura: " << filename << std::endl;
         return false;
     }
-
+    // Scrivi ogni sezione con relative chiavi/valori nel formato INI standard
     for (const auto& sectionPair : data) {
         file << '[' << sectionPair.first << ']' << std::endl;
 
         for (const auto& keyPair : sectionPair.second) {
             file << keyPair.first << '=' << keyPair.second << std::endl;
         }
-        file << std::endl;
+        file << std::endl;  // Linea vuota tra le sezioni
     }
 
     file.close();
+    // Restituisce true se non ci sono stati errori durante l'operazione di scrittura
     return !file.fail();
 }
 

@@ -1,8 +1,6 @@
-#include "gtest/gtest.h" // Funzionerà grazie al linking con gtest_main (via FetchContent)
-#include "../iniParser.h"   // Funzionerà grazie a target_include_directories(${CMAKE_SOURCE_DIR})
-
+#include "gtest/gtest.h"
+#include "../iniParser.h"
 #include <fstream>
-#include <cstdio> // Per std::remove
 
 // Prepara un file INI temporaneo per i test
 class IniParserTest : public ::testing::Test {
