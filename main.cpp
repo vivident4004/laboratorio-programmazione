@@ -75,6 +75,24 @@ int main() {
         parser.setValue("general", "name", "NomeModificato");
         std::cout << "Nuovo valore di 'name': " << parser.getValue("general", "name") << std::endl;
 
+        // Test della funzione deleteKey
+        std::cout << "\nEliminazione di una chiave..." << std::endl;
+        std::cout << "Prima dell'eliminazione, nuovachiave = " << parser.getValue("nuovasezione", "nuovachiave") << std::endl;
+        if (parser.deleteKey("nuovasezione", "nuovachiave")) {
+            std::cout << "Chiave 'nuovachiave' eliminata con successo!" << std::endl;
+        } else {
+            std::cout << "Errore nell'eliminazione della chiave 'nuovachiave'." << std::endl;
+        }
+        
+        // Test della funzione deleteSection
+        std::cout << "\nEliminazione di una sezione..." << std::endl;
+        std::cout << "La sezione 'configurazione' esiste: " << (parser.hasSection("configurazione") ? "Sì" : "No") << std::endl;
+        if (parser.deleteSection("configurazione")) {
+            std::cout << "Sezione 'configurazione' eliminata con successo!" << std::endl;
+        } else {
+            std::cout << "Errore nell'eliminazione della sezione 'configurazione'." << std::endl;
+        }
+        
         // Stampa il file INI dopo le modifiche
         std::cout << "\nContenuto del file INI dopo le modifiche:" << std::endl;
         std::cout << parser.print();

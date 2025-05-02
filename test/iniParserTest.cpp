@@ -170,3 +170,34 @@ TEST_F(IniParserTest, FindKeyInAllSections) {
     std::vector<std::string> sectionsWithHostUpper = parser.hasKey("HOST");
     EXPECT_EQ(sectionsWithHostUpper.size(), 2);
 }
+
+TEST_F(IniParserTest, DeleteKey) {
+    IniParser parser;
+    parser.load("temp_test.ini");
+    
+    EXPECT_TRUE(parser.hasKey("general", "name"));
+    EXPECT_TRUE(parser.deleteKey("general", "name"));
+    EXPECT_FALSE(parser.hasKey("general", "name"));
+    EXPECT_TRUE(parser.hasKey("general", "version"));
+    
+    EXPECT_FALSE(parser.deleteKey("general", "nonexistent"));
+    EXPECT_FALSE(parser.deleteKey("nonexistent", "key"));
+    
+    parser.setValue("test", "CaseSensitive", "value");
+    EXPECT_TRUE(parser.deleteKey("TEST", "casesensitive"));
+}
+
+TEST_F(IniParserTest, DeleteSection) {
+    IniParser parser;
+    parser.load("temp_test.ini");
+    
+    EXPECT_TRUE(parser.hasSection("general"));
+    EXPECT_TRUE(parser.deleteSection("general"));
+    EXPECT_FALSE(parser.hasSection("general"));
+    EXPECT_TRUE(parser.hasSection("network"));
+    
+    EXPECT_FALSE(parser.deleteSection("nonexistent"));
+    
+    parser.addSection("CaseSensitive");
+    EXPECT_TRUE(parser.deleteSection("casesensitive"));
+}

@@ -25,7 +25,7 @@ std::string IniParser::toLower(const std::string& str) {
 bool IniParser::load(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Impossibile aprire il file: " << filename << std::endl;
+        std::cerr << "Impossibile aprire \"" << filename << "\"" << std::endl;
         return false;
 
     }
@@ -42,7 +42,7 @@ bool IniParser::load(const std::string& filename) {
         if (line[0] == '[' && line.back() == ']') {
             // Estrae il nome senza '[' e ']'
             section = toLower(line.substr(1, line.length() - 2));
-            data[section]; // Assicura che la sezione esista
+            data[section];
             continue;
         }
 
@@ -134,8 +134,35 @@ std::vector<std::string> IniParser::hasKey(const std::string& key) {
 }
 
 bool IniParser::deleteKey(const std::string& section, const std::string& key) {
-    // TODO
-    return false;
+    std::string lowerSection = toLower(section);
+    std::string lowerKey = toLower(key);
+
+    auto sectionIt = data.find(lowerSection);
+    if (sectionIt == data.end()) {
+        return false;
+    }
+    
+    // Controlla che la chiave esista nella sezione
+    auto& sectionData = sectionIt->second;
+    auto keyIt = sectionData.find(lowerKey);
+    if (keyIt == sectionData.end()) {
+        return false;
+    }
+
+    sectionData.erase(keyIt);
+    return true;
+}
+
+bool IniParser::deleteSection(const std::string& section) {
+    std::string lowerSection = toLower(section);
+    
+    auto sectionIt = data.find(lowerSection);
+    if (sectionIt == data.end()) {
+        return false;
+    }
+    
+    data.erase(sectionIt);
+    return true;
 }
 
 std::string IniParser::print() const {
