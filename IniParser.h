@@ -21,15 +21,18 @@ public:
     bool deleteKey(const std::string& section, const std::string& key);
     void addSection(const std::string& section);
     bool hasSection(const std::string& section) const;
-    // TODO metodo che rende il nome di tutte le sezioni che hanno una certa parola
-    // TODO poter aggiungere un commento collegato al parametro di una sezione
-    // TODO metodo che cerca un commento con una certa parola e rende la riga
+    std::vector<std::string> findSectionsContainingWord(const std::string& word) const;
+    void addCommentToParam(const std::string& section, const std::string& param, const std::string& comment);
+    std::string getCommentFromParam(const std::string &section, const std::string &param) const;
+    bool deleteCommentFromParam(const std::string &section, const std::string &param);
+
     bool deleteSection(const std::string& section);
     std::string toString() const;
 
 private:
     std::string filename;
     std::map<std::string, std::map<std::string, std::string>> data;
+    std::map<std::string, std::map<std::string, std::string>> paramComments;
     static std::string toLower(const std::string& str);
 };
 
