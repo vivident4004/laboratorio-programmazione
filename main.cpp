@@ -21,10 +21,38 @@ int main() {
     parser.addSection("UserSettings");
     parser.setValue("UserSettings", "Tema", "Scuro");
     parser.setValue("UserSettings", "GrandezzaCarattere", "12");
+
+    parser.addSection("DatabaseConfig");
+    parser.setValue("DatabaseConfig", "Host", "db.example.com");
+    parser.addSection("NetworkConfig");
+    parser.setValue("NetworkConfig", "Timeout", "30");
+    parser.addSection("AnotherConfig");
+    parser.setValue("AnotherConfig", "Mode", "Advanced");
+
     std::cout << "   Struttura INI costruita in memoria.\n" << std::endl;
 
     std::cout << "Contenuto iniziale (in memoria):\n"
               << parser.toString() << std::endl;
+
+    std::string sectionSearchTerm = "Config";
+    std::cout << "Ricerca sezioni contenenti la parola: \"" << sectionSearchTerm
+              << "\"" << std::endl;
+
+    std::vector<std::string> matchingSections =
+        parser.findSectionsContainingWord(sectionSearchTerm);
+
+    if (matchingSections.empty()) {
+        std::cout << "Nessuna sezione trovata contenente la parola \""
+                  << sectionSearchTerm << "\"." << std::endl;
+    } else {
+        std::cout << "Trovate " << matchingSections.size()
+                  << " sezioni contenenti la parola \"" << sectionSearchTerm
+                  << "\":" << std::endl;
+        for (const std::string& sectionName : matchingSections) {
+            std::cout << "  - Sezione: [" << sectionName << "]" << std::endl;
+        }
+    }
+    std::cout << std::endl;
 
     std::cout << "2. Lettura valore [General]AppName: "
               << parser.getValue("General", "AppName") << "\n"
