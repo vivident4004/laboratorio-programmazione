@@ -387,3 +387,59 @@ TEST_F(IniParserTest, MultiLineCommentsLoadAndSave) {
     std::remove(multiLineFilename.c_str());
     std::remove(savedMultiLineFilename.c_str());
 }
+
+TEST_F(IniParserTest, FindAllCommentStringsContainingWord) {
+    IniParser parser;
+    parser.addSection("general");
+    parser.setValue("general", "name", "TestApp");
+    parser.addCommentToParam("general", "name", "Application Name - IMPORTANT"); // Commento 1
+    parser.setValue("general", "version", "1.0");
+    parser.addCommentToParam("general", "version", "Version (critical for updates)"); // Commento 2
+
+    parser.addSection("network");
+    parser.setValue("network", "host", "localhost");
+    parser.addCommentToParam("network", "host", "Server address (important for connection)"); // Commento 3
+    parser.setValue("network", "port", "8080");
+
+    // parola "important" (case-insensitive)
+    std::vector<std::string> resultsImportant =
+        parser.findCommentStringsContainingWord("important");
+    ASSERT_EQ(resultsImportant.size(), 2); // Verifica che ci siano due risultati
+
+    // Verifica la presenza di ciascun commento atteso, indipendentemente dall'ordine
+    bool foundComment1 = false;
+    bool foundComment3 = false;
+    for (const std::string& comment : resultsImportant) {
+        if (comment == "Application Name - IMPORTANT") {
+            foundComment1 = true;
+        } else if (comment == "Server address (important for connection)") {
+            foundComment3 = true;
+        }
+    }
+    EXPECT_TRUE(foundComment1);
+    EXPECT_TRUE(foundComment3);
+
+    // Parola "critical"
+    std::vector<std::string> resultsCritical =
+        parser.findCommentStringsContainingWord("critical");
+    ASSERT_EQ(resultsCritical.size(), 1);
+    EXPECT_EQ(resultsCritical[0], "Version (critical for updates)");
+
+    // Caso 3: Parola non trovata
+    std::vector<std::string> resultsNonExistent =
+        parser.findCommentStringsContainingWord("nonexistentword");
+    EXPECT_TRUE(resultsNonExistent.empty());
+
+    // Caso 4: Parola vuota
+    std::vector<std::string> resultsEmptyWord =
+        parser.findCommentStringsContainingWord("");
+    EXPECT_TRUE(resultsEmptyWord.empty());
+
+    // Caso 5: Parser senza commenti
+    IniParser emptyParser;
+    emptyParser.addSection("test");
+    emptyParser.setValue("test", "key", "value");
+    std::vector<std::string> resultsNoComments =
+        emptyParser.findCommentStringsContainingWord("any");
+    EXPECT_TRUE(resultsNoComments.empty());
+}

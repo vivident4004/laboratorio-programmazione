@@ -25,7 +25,7 @@ public:
     void addCommentToParam(const std::string& section, const std::string& param, const std::string& comment);
     std::string getCommentFromParam(const std::string &section, const std::string &param) const;
     bool deleteCommentFromParam(const std::string &section, const std::string &param);
-
+    std::vector<std::string> findCommentStringsContainingWord(const std::string& wordToFind) const;
     bool deleteSection(const std::string& section);
     std::string toString() const;
 

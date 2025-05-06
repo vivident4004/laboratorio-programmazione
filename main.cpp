@@ -43,37 +43,59 @@ int main() {
     std::cout << "   Valore [NewSection]TestKey: "
               << parser.getValue("NewSection", "TestKey") << "\n"
               << std::endl;
+    parser.addCommentToParam("newsection", "testkey",
+        "Commento di prova - Federico Faggin");
 
     std::cout << "5. Modifica commento a [UserSettings]Tema..." << std::endl;
     parser.addCommentToParam("UserSettings", "Tema",
-                             "Tema preferito dall'utente - aggiornato");
+                             "Tema preferito dall'utente Faggin - aggiornato");
     std::cout << "   Commento per [UserSettings]Tema: '"
               << parser.getCommentFromParam("UserSettings", "Tema") << "'\n"
               << std::endl;
 
-    std::cout << "6. Eliminazione chiave [General]AppName..." << std::endl;
+    std::string mainSearchTerm = "FAGGIN";
+    std::cout << "6. Ricerca stringhe di commento contenenti la parola: \""
+              << mainSearchTerm << "\"" << std::endl;
+
+    std::vector<std::string> foundCommentStrings =
+        parser.findCommentStringsContainingWord(mainSearchTerm);
+
+    if (foundCommentStrings.empty()) {
+        std::cout << "   Nessuna stringa di commento trovata contenente la parola \""
+                  << mainSearchTerm << "\"." << std::endl;
+    } else {
+        std::cout << "   Trovate " << foundCommentStrings.size()
+                  << " stringhe di commento contenenti la parola \""
+                  << mainSearchTerm << "\":" << std::endl;
+        for (const std::string& commentStr : foundCommentStrings) {
+            std::cout << "   - Commento: \"" << commentStr << "\"" << std::endl;
+        }
+    }
+    std::cout << std::endl;
+
+    std::cout << "7. Eliminazione chiave [General]AppName..." << std::endl;
     parser.deleteKey("General", "AppName");
     std::cout << "   Chiave [General]AppName esiste? "
               << (parser.hasKey("General", "AppName") ? "Sì" : "No") << "\n"
               << std::endl;
 
-    std::cout << "7. Eliminazione commento da [UserSettings]Tema..."
+    std::cout << "8. Eliminazione commento da [UserSettings]Tema..."
               << std::endl;
     parser.deleteCommentFromParam("UserSettings", "Tema");
     std::cout << "   Commento per [UserSettings]Tema dopo eliminazione: '"
               << parser.getCommentFromParam("UserSettings", "Tema") << "'\n"
               << std::endl;
 
-    std::cout << "8. Eliminazione sezione [NewSection]..." << std::endl;
+    std::cout << "9. Eliminazione sezione [NewSection]..." << std::endl;
     parser.deleteSection("NewSection");
     std::cout << "   Sezione [NewSection] esiste? "
               << (parser.hasSection("NewSection") ? "Sì" : "No") << "\n"
               << std::endl;
 
-    std::cout << "9. Contenuto INI corrente (toString):\n"
+    std::cout << "10. Contenuto INI corrente (toString):\n"
               << parser.toString() << std::endl;
 
-    std::cout << "10. Salvataggio modifiche su '" << filename << "'..."
+    std::cout << "11. Salvataggio modifiche su '" << filename << "'..."
               << std::endl;
     if (parser.save(filename)) {
         std::cout << "    File salvato con successo.\n" << std::endl;
@@ -96,7 +118,7 @@ int main() {
                   << std::endl;
     }
 
-    std::cout << "11. Eliminazione del file '" << filename << "'..."
+    std::cout << "12. Eliminazione del file '" << filename << "'..."
               << std::endl;
     if (std::remove(filename.c_str()) == 0) {
         std::cout << "    File eliminato con successo." << std::endl;

@@ -88,7 +88,7 @@ bool IniParser::load(const std::string& filename) {
                 // Il blocco di commenti è stato gestito (associato o implicitamente scartato se la chiave non era valida)
                 accumulatedCommentBlock.clear();
             } else {
-                // Linea non K=V valida in una sezione: scarta i commenti accumulati
+                // Linea non CH=V valida in una sezione: scarta i commenti accumulati
                 accumulatedCommentBlock.clear();
             }
         } else {
@@ -164,7 +164,6 @@ void IniParser::addSection(const std::string& section) {
     const std::string lowerSection = toLower(section);
     data[lowerSection];
     paramComments[lowerSection];
-
 }
 
 bool IniParser::hasSection(const std::string& section) const {
@@ -207,6 +206,7 @@ std::vector<std::string> IniParser::findSectionsContainingWord(const std::string
             foundSections.push_back(sectionPair.first); // Restituisce il nome della sezione così com'è memorizzato
         }
     }
+
     return foundSections;
 }
 
@@ -232,6 +232,7 @@ std::string IniParser::getCommentFromParam(const std::string& section, const std
             return paramIt->second;
         }
     }
+
     return "";
 }
 
@@ -243,7 +244,37 @@ bool IniParser::deleteCommentFromParam(const std::string& section, const std::st
     if (sectionIt != paramComments.end()) {
         return sectionIt->second.erase(lowerParam) > 0;
     }
+
     return false;
+}
+
+std::vector<std::string> IniParser::findCommentStringsContainingWord(const std::string &wordToFind) const {
+    std::vector<std::string> matchingCommentStrings;
+
+    if (wordToFind.empty()) {
+        return matchingCommentStrings; // Nessuna parola da cercare, nessun risultato
+    }
+
+    const std::string lowerWordToFind = toLower(wordToFind);
+
+    // Itera su tutte le sezioni che hanno commenti di parametri
+    for (const auto& sectionPair : paramComments) {
+        // sectionPair.second è la mappa delle chiavi ai loro commenti per questa sezione
+        const std::map<std::string, std::string>& keyCommentMap =
+            sectionPair.second;
+
+        for (const auto& keyCommentPair : keyCommentMap) {
+            const std::string& commentText = keyCommentPair.second;
+
+            if (!commentText.empty() &&
+                toLower(commentText).find(lowerWordToFind) !=
+                    std::string::npos) {
+                matchingCommentStrings.push_back(commentText);
+                    }
+        }
+    }
+
+    return matchingCommentStrings;
 }
 
 bool IniParser::deleteKey(const std::string& section, const std::string& key) {
@@ -252,7 +283,7 @@ bool IniParser::deleteKey(const std::string& section, const std::string& key) {
 
     const auto sectionIt = data.find(lowerSection);
     if (sectionIt != data.end()) {
-        bool erasedFromData = sectionIt->second.erase(lowerKey) > 0;
+        const bool erasedFromData = sectionIt->second.erase(lowerKey) > 0;
         // Elimina anche il commento associato, se presente
         const auto commentSectionIt = paramComments.find(lowerSection);
         if (commentSectionIt != paramComments.end()) {
@@ -260,8 +291,8 @@ bool IniParser::deleteKey(const std::string& section, const std::string& key) {
         }
         return erasedFromData;
     }
-    return false;
 
+    return false;
 }
 
 bool IniParser::deleteSection(const std::string& section) {
@@ -310,5 +341,6 @@ std::string IniParser::toString() const {
         }
         output += '\n';
     }
+
     return output;
 }
