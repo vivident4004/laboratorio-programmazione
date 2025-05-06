@@ -60,7 +60,7 @@ int main() {
 
         // Stampa il file INI completo
         std::cout << "\nContenuto attuale del file INI:" << std::endl;
-        std::cout << parser.print();
+        std::cout << parser.toString();
 
         // Prova a leggere un valore inesistente
         std::cout << "\nValore inesistente (dovrebbe essere vuoto): '" << parser.getValue("nonexistent", "key") << "'" << std::endl;
@@ -95,7 +95,7 @@ int main() {
         
         // Stampa il file INI dopo le modifiche
         std::cout << "\nContenuto del file INI dopo le modifiche:" << std::endl;
-        std::cout << parser.print();
+        std::cout << parser.toString();
 
         // Salva le modifiche sullo stesso file
         std::cout << "\nSalvataggio delle modifiche" << std::endl;

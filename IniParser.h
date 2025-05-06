@@ -10,19 +10,22 @@
 
 class IniParser {
 public:
-    IniParser();
+    IniParser() = default;
     explicit IniParser(const std::string& filename);
     bool load(const std::string& filename);
     bool save(const std::string& filename) const;
-    std::string getValue(const std::string& section, const std::string& key);
+    std::string getValue(const std::string& section, const std::string& key) const;
     void setValue(const std::string& section, const std::string& key, const std::string& value);
-    bool hasKey(const std::string& section, const std::string& key);
-    std::vector<std::string> hasKey(const std::string& key);
+    bool hasKey(const std::string& section, const std::string& key) const;
+    std::vector<std::string> hasKey(const std::string& key) const;
     bool deleteKey(const std::string& section, const std::string& key);
     void addSection(const std::string& section);
     bool hasSection(const std::string& section) const;
+    // TODO metodo che rende il nome di tutte le sezioni che hanno una certa parola
+    // TODO poter aggiungere un commento collegato al parametro di una sezione
+    // TODO metodo che cerca un commento con una certa parola e rende la riga
     bool deleteSection(const std::string& section);
-    std::string print() const;
+    std::string toString() const;
 
 private:
     std::string filename;

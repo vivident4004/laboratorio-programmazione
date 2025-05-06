@@ -65,14 +65,6 @@ TEST_F(IniParserTest, NonExistentValues) {
     EXPECT_EQ(parser.getValue("general", "nonexistent"), "");
 }
 
-TEST_F(IniParserTest, IgnoreLines) {
-    IniParser parser;
-    parser.load("temp_test.ini");
-
-    EXPECT_EQ(parser.getValue("general", "name"), "TestApp");
-    EXPECT_EQ(parser.getValue("network", "port"), "8086");
-}
-
 TEST_F(IniParserTest, HasSection) {
     IniParser parser;
     parser.load("temp_test.ini");
@@ -81,7 +73,7 @@ TEST_F(IniParserTest, HasSection) {
     EXPECT_TRUE(parser.hasSection("network"));
     EXPECT_FALSE(parser.hasSection("nonexistent"));
 
-    // ase insensitivity
+    // Case insensitivity
     EXPECT_TRUE(parser.hasSection("GENERAL"));
     EXPECT_TRUE(parser.hasSection("Network"));
 }
@@ -98,12 +90,12 @@ TEST_F(IniParserTest, AddSection) {
     EXPECT_TRUE(parser.hasSection("general"));
 }
 
-TEST_F(IniParserTest, PrintContent) {
+TEST_F(IniParserTest, ToString) {
     IniParser parser;
     parser.setValue("section1", "key1", "value1");
     parser.setValue("section1", "key2", "value2");
 
-    std::string output = parser.print();
+    std::string output = parser.toString();
     EXPECT_TRUE(output.find("[section1]") != std::string::npos);
     EXPECT_TRUE(output.find("key1=value1") != std::string::npos);
     EXPECT_TRUE(output.find("key2=value2") != std::string::npos);

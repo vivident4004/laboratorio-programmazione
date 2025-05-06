@@ -7,8 +7,6 @@
 #include <cctype> // Per ::tolower
 #include <algorithm> // Per std::transform
 
-IniParser::IniParser() = default;
-
 IniParser::IniParser(const std::string& filename) {
     if (!load(filename)) {
         std::cerr << "Errore nel caricamento del file nel costruttore: "
@@ -48,10 +46,9 @@ bool IniParser::load(const std::string& filename) {
 
         // Parsing delle coppie chiave=valore (solo se siamo dentro una sezione valida)
         if (!section.empty()) {
-            size_t pos = line.find('=');
-            if (pos != std::string::npos) {
+            if (const size_t pos = line.find('='); pos != std::string::npos) {
                 std::string key = line.substr(0, pos);
-                std::string value = line.substr(pos + 1);
+                const std::string value = line.substr(pos + 1);
                 std::string lowerKey = toLower(key);
 
                 if (!lowerKey.empty()) { // Ignora chiavi vuote
@@ -86,16 +83,18 @@ bool IniParser::save(const std::string& filename) const {
     return !file.fail();
 }
 
-std::string IniParser::getValue(const std::string& section, const std::string& key) {
+std::string IniParser::getValue(const std::string& section, const std::string& key) const {
     // Controlla se la sezione esiste
-    if (data.find(section) != data.end()) {
-        // Controlla se la chiave esiste nella sezione
-        if (data[section].find(key) != data[section].end()) {
-            return data[section][key];
+    if (const auto sectionIt = data.find(section); sectionIt != data.end()) {
+        // Si usa ->second per accedere al valore dall'iteratore (const correct)
+        const auto& innerMap = sectionIt->second;
+
+        if (const auto keyIt = innerMap.find(key); keyIt != innerMap.end()) {
+            return keyIt->second;
         }
     }
 
-    return ""; // Ritorna stringa vuota se non trovato
+    return ""; // Ritorna stringa vuota se non è stato trovato nessun valore
 }
 
 void IniParser::setValue(const std::string& section, const std::string& key, const std::string& value) {
@@ -110,8 +109,8 @@ bool IniParser::hasSection(const std::string& section) const {
     return data.find(toLower(section)) != data.end();
 }
 
-bool IniParser::hasKey(const std::string& section, const std::string& key) {
-    auto sectionIt = data.find(toLower(section));
+bool IniParser::hasKey(const std::string& section, const std::string& key) const {
+    const auto sectionIt = data.find(toLower(section));
 
     if (sectionIt == data.end()) {
         return false;
@@ -120,9 +119,9 @@ bool IniParser::hasKey(const std::string& section, const std::string& key) {
     return sectionIt->second.find(toLower(key)) != sectionIt->second.end();
 }
 
-std::vector<std::string> IniParser::hasKey(const std::string& key) {
+std::vector<std::string> IniParser::hasKey(const std::string& key) const {
     std::vector<std::string> sections;
-    std::string lowerKey = toLower(key);
+    const std::string lowerKey = toLower(key);
 
     for (const auto& sectionPair : data) {
         if (sectionPair.second.find(lowerKey) != sectionPair.second.end()) {
@@ -134,17 +133,17 @@ std::vector<std::string> IniParser::hasKey(const std::string& key) {
 }
 
 bool IniParser::deleteKey(const std::string& section, const std::string& key) {
-    std::string lowerSection = toLower(section);
-    std::string lowerKey = toLower(key);
+    const std::string lowerSection = toLower(section);
+    const std::string lowerKey = toLower(key);
 
-    auto sectionIt = data.find(lowerSection);
+    const auto sectionIt = data.find(lowerSection);
     if (sectionIt == data.end()) {
         return false;
     }
     
     // Controlla che la chiave esista nella sezione
     auto& sectionData = sectionIt->second;
-    auto keyIt = sectionData.find(lowerKey);
+    const auto keyIt = sectionData.find(lowerKey);
     if (keyIt == sectionData.end()) {
         return false;
     }
@@ -154,9 +153,9 @@ bool IniParser::deleteKey(const std::string& section, const std::string& key) {
 }
 
 bool IniParser::deleteSection(const std::string& section) {
-    std::string lowerSection = toLower(section);
+    const std::string lowerSection = toLower(section);
     
-    auto sectionIt = data.find(lowerSection);
+    const auto sectionIt = data.find(lowerSection);
     if (sectionIt == data.end()) {
         return false;
     }
@@ -165,7 +164,7 @@ bool IniParser::deleteSection(const std::string& section) {
     return true;
 }
 
-std::string IniParser::print() const {
+std::string IniParser::toString() const {
     std::string output;
 
     for (const auto& sectionPair : data) {
