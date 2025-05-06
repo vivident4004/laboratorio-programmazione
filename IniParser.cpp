@@ -23,7 +23,6 @@ std::string IniParser::toLower(const std::string& str) {
 bool IniParser::load(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Impossibile aprire \"" << filename << "\"" << std::endl;
         return false;
     }
 
@@ -33,71 +32,71 @@ bool IniParser::load(const std::string& filename) {
 
     std::string line;
     std::string currentSection;
-    std::string lastParamKey; // Per associare commenti al parametro precedente
+    std::string accumulatedCommentBlock; // Buffer per commenti che precedono una chiave
 
     while (std::getline(file, line)) {
-        // Rimuovi spazi bianchi iniziali e finali
         line.erase(0, line.find_first_not_of(" \t\n\r\f\v"));
         line.erase(line.find_last_not_of(" \t\n\r\f\v") + 1);
 
         if (line.empty()) {
-            lastParamKey.clear(); // Resetta dopo una linea vuota
             continue;
         }
 
-        // Parsing dei commenti (linee che iniziano con ';' o '#')
+        // 1. Accumula righe di commento consecutive
         if (line[0] == ';' || line[0] == '#') {
-            if (!currentSection.empty() && !lastParamKey.empty()) {
-                // Assumiamo che il commento si riferisca all'ultimo parametro letto nella sezione corrente
-                // Rimuovi il carattere di commento e lo spazio iniziale
-                std::string commentContent = line.substr(1);
-                commentContent.erase(0, commentContent.find_first_not_of(" \t"));
-
-                // Se c'è già un commento, lo accodiamo. Altrimenti lo impostiamo.
-                if (paramComments[currentSection].count(lastParamKey)) {
-                    paramComments[currentSection][lastParamKey] += '\n' + commentContent;
-                } else {
-                    paramComments[currentSection][lastParamKey] = commentContent;
-                }
+            std::string commentLineContent = line.substr(1);
+            commentLineContent.erase(0, commentLineContent.find_first_not_of(" \t"));
+            if (!accumulatedCommentBlock.empty()) {
+                accumulatedCommentBlock += '\n';
             }
-            // Altrimenti è un commento generico o di sezione, per ora lo ignoriamo se non è associabile a un parametro
+            accumulatedCommentBlock += commentLineContent;
             continue;
         }
 
-        // Parsing delle sezioni [SectionName]
+        // Se non è un commento, il blocco di commenti accumulato (se esiste)
+        // appartiene all'elemento corrente (sezione o chiave) o viene scartato.
+
+        // 2. Processa le sezioni: i commenti accumulati prima di una sezione vengono resettati
         if (line[0] == '[' && line.back() == ']') {
             currentSection = toLower(line.substr(1, line.length() - 2));
-            data[currentSection]; // Assicura che la sezione esista
-            paramComments[currentSection]; // Assicura che la sezione esista per i commenti
-            lastParamKey.clear(); // Resetta quando cambia sezione
+            data[currentSection];
+            paramComments[currentSection];
+            accumulatedCommentBlock.clear(); // Commenti non per una chiave, ma per la sezione (o scartati)
             continue;
         }
 
-        // Parsing delle coppie chiave=valore
+        // 3. Processa le coppie chiave=valore: associa i commenti accumulati a questa chiave
         if (!currentSection.empty()) {
             size_t delimiterPos = line.find('=');
             if (delimiterPos != std::string::npos) {
                 std::string key = line.substr(0, delimiterPos);
                 std::string value = line.substr(delimiterPos + 1);
 
-                // Rimuovi spazi bianchi da chiave e valore
                 key.erase(0, key.find_first_not_of(" \t"));
                 key.erase(key.find_last_not_of(" \t") + 1);
                 value.erase(0, value.find_first_not_of(" \t"));
                 value.erase(value.find_last_not_of(" \t") + 1);
 
                 std::string lowerKey = toLower(key);
+
                 if (!lowerKey.empty()) {
                     data[currentSection][lowerKey] = value;
-                    lastParamKey = lowerKey; // Salva questa chiave come l'ultima letta
-                } else {
-                    lastParamKey.clear();
+                    if (!accumulatedCommentBlock.empty()) {
+                        paramComments[currentSection][lowerKey] = accumulatedCommentBlock;
+                    }
                 }
+                // Il blocco di commenti è stato gestito (associato o implicitamente scartato se la chiave non era valida)
+                accumulatedCommentBlock.clear();
             } else {
-                lastParamKey.clear(); // Linea non valida come K=V
+                // Linea non K=V valida in una sezione: scarta i commenti accumulati
+                accumulatedCommentBlock.clear();
             }
+        } else {
+            // Linea non commento, non sezione, e non siamo in una sezione: scarta i commenti
+            accumulatedCommentBlock.clear();
         }
     }
+
     file.close();
     return true;
 }
@@ -295,7 +294,16 @@ std::string IniParser::toString() const {
                 // Cerca un commento specifico per la chiave corrente
                 auto itKeyComment = keyCommentMap.find(keyName);
                 if (itKeyComment != keyCommentMap.end() && !itKeyComment->second.empty()) {
-                    output += "; " + itKeyComment->second + '\n';
+                    std::string fullComment = itKeyComment->second;
+                    size_t startPos = 0;
+                    while ((startPos = fullComment.find_first_not_of('\n', startPos)) != std::string::npos) {
+                        size_t endPos =
+                            fullComment.find_first_of('\n', startPos);
+                        output += "; " + fullComment.substr(startPos, endPos - startPos) + '\n';
+                        if (endPos == std::string::npos)
+                            break;
+                        startPos = endPos + 1;
+                    }
                 }
             }
             output += keyName + '=' + keyValue + '\n';

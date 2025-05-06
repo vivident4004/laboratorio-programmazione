@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <direct.h>
 #include <fstream>
 
 #include "IniParser.h"
@@ -45,11 +44,11 @@ int main() {
               << parser.getValue("NewSection", "TestKey") << "\n"
               << std::endl;
 
-    std::cout << "5. Modifica commento a [UserSettings]Theme..." << std::endl;
-    parser.addCommentToParam("UserSettings", "Theme",
-                             "User's preferred UI theme - updated");
-    std::cout << "   Commento per [UserSettings]Theme: '"
-              << parser.getCommentFromParam("UserSettings", "Theme") << "'\n"
+    std::cout << "5. Modifica commento a [UserSettings]Tema..." << std::endl;
+    parser.addCommentToParam("UserSettings", "Tema",
+                             "Tema preferito dall'utente - aggiornato");
+    std::cout << "   Commento per [UserSettings]Tema: '"
+              << parser.getCommentFromParam("UserSettings", "Tema") << "'\n"
               << std::endl;
 
     std::cout << "6. Eliminazione chiave [General]AppName..." << std::endl;
@@ -58,11 +57,11 @@ int main() {
               << (parser.hasKey("General", "AppName") ? "Sì" : "No") << "\n"
               << std::endl;
 
-    std::cout << "7. Eliminazione commento da [UserSettings]Theme..."
+    std::cout << "7. Eliminazione commento da [UserSettings]Tema..."
               << std::endl;
     parser.deleteCommentFromParam("UserSettings", "Tema");
-    std::cout << "   Commento per [UserSettings]Theme dopo eliminazione: '"
-              << parser.getCommentFromParam("UserSettings", "Theme") << "'\n"
+    std::cout << "   Commento per [UserSettings]Tema dopo eliminazione: '"
+              << parser.getCommentFromParam("UserSettings", "Tema") << "'\n"
               << std::endl;
 
     std::cout << "8. Eliminazione sezione [NewSection]..." << std::endl;

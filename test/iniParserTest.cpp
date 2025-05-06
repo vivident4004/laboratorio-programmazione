@@ -169,15 +169,15 @@ TEST_F(IniParserTest, FindKeyInAllSections) {
 TEST_F(IniParserTest, DeleteKey) {
     IniParser parser;
     parser.load("temp_test.ini");
-    
+
     EXPECT_TRUE(parser.hasKey("general", "name"));
     EXPECT_TRUE(parser.deleteKey("general", "name"));
     EXPECT_FALSE(parser.hasKey("general", "name"));
     EXPECT_TRUE(parser.hasKey("general", "version")); // Altra chiave ancora presente
-    
+
     EXPECT_FALSE(parser.deleteKey("general", "nonexistent"));
     EXPECT_FALSE(parser.deleteKey("nonexistent", "key"));
-    
+
     parser.setValue("test", "CaseSensitive", "value");
     EXPECT_TRUE(parser.deleteKey("TEST", "casesensitive"));
 }
@@ -185,7 +185,7 @@ TEST_F(IniParserTest, DeleteKey) {
 TEST_F(IniParserTest, DeleteSection) {
     IniParser parser;
     parser.load("temp_test.ini");
-    
+
     EXPECT_TRUE(parser.hasSection("general"));
     EXPECT_TRUE(parser.deleteSection("general"));
     EXPECT_FALSE(parser.hasSection("general"));
@@ -316,4 +316,74 @@ TEST_F(IniParserTest, DeleteSectionAlsoDeletesComments) {
     ASSERT_FALSE(parser.hasSection("sectionWithComments"));
     ASSERT_EQ(parser.getCommentFromParam("sectionWithComments", "key1"), ""); // Commento sparito
     ASSERT_EQ(parser.getCommentFromParam("sectionWithComments", "key2"), ""); // Commento sparito
+}
+
+TEST_F(IniParserTest, MultiLineCommentsLoadAndSave) {
+    const std::string multiLineFilename = "temp_multiline_test.ini";
+    // File con commenti multiriga
+    {
+        std::ofstream testFile(multiLineFilename);
+        testFile << "[section1]\n"
+                 << "; This is the first line of the comment.\n" // Commento per key1
+                 << "; This is the second line.\n"               // Commento per key1
+                 << "# And a third line with a different char.\n"// Commento per key1
+                 << "key1=value1\n"
+                 << "\n" // Una linea vuota opzionale
+                 << "; Single line comment for key2\n"           // Commento per key2
+                 << "key2=value2 ; inline comment, part of value\n"
+                 << "[section2]\n"
+                 << "key3=value3\n";
+        testFile.close();
+    }
+
+    IniParser parser1;
+    ASSERT_TRUE(parser1.load(multiLineFilename));
+
+    // Verifica la lettura del commento multi-riga
+    std::string expectedCommentForKey1 =
+        "This is the first line of the comment.\n"
+        "This is the second line.\n"
+        "And a third line with a different char.";
+    EXPECT_EQ(parser1.getCommentFromParam("section1", "key1"),
+                expectedCommentForKey1);
+
+    // Verifica la lettura del commento a riga singola per key2
+    EXPECT_EQ(parser1.getCommentFromParam("section1", "key2"),
+                "Single line comment for key2");
+
+    // Salva e ricarica
+    const std::string savedMultiLineFilename = "temp_multiline_saved.ini";
+    ASSERT_TRUE(parser1.save(savedMultiLineFilename));
+
+    IniParser parser2;
+    ASSERT_TRUE(parser2.load(savedMultiLineFilename));
+    // Verifica che i commenti siano preservati dopo il salvataggio e ricaricamento
+    EXPECT_EQ(parser2.getCommentFromParam("section1", "key1"),
+                expectedCommentForKey1);
+    EXPECT_EQ(parser2.getCommentFromParam("section1", "key2"), // Verifica anche qui
+                "Single line comment for key2");
+    EXPECT_EQ(parser2.getValue("section1", "key1"), "value1");
+    EXPECT_EQ(parser2.getValue("section1", "key2"),
+                "value2 ; inline comment, part of value");
+
+    // Verifica toString() con commenti multi-riga
+    //    L'ordine delle chiavi in una sezione è alfabetico a causa di std::map
+    //    L'uscita attesa per toString deve riflettere la nuova struttura del file
+    std::string expectedToStringOutput =
+        "[section1]\n"
+        "; This is the first line of the comment.\n"
+        "; This is the second line.\n"
+        "; And a third line with a different char.\n"
+        "key1=value1\n"
+        "; Single line comment for key2\n"
+        "key2=value2 ; inline comment, part of value\n"
+        "\n"
+        "[section2]\n"
+        "key3=value3\n"
+        "\n";
+
+    EXPECT_EQ(parser2.toString(), expectedToStringOutput);
+
+    std::remove(multiLineFilename.c_str());
+    std::remove(savedMultiLineFilename.c_str());
 }
