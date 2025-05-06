@@ -20,7 +20,10 @@ protected:
                 << "user=db_user\n"
                 << "\n"
                 << "[DATABASE_Secondary]\n"
-                << "user=db_user_secondary\n";
+                << "user=db_user_secondary\n"
+                << "user=admin ; User ID\n"
+                << "pass=password\n"
+                << "mode=test ; Operation mode\n";
         testFile.close();
     }
 
@@ -222,4 +225,95 @@ TEST_F(IniParserTest, FindSectionContainingWord) {
     std::vector<std::string> result5 = parser.findSectionsContainingWord("NETWORK");
     ASSERT_EQ(result5.size(), 1);
     EXPECT_EQ(result5[0], "network");
+}
+
+TEST_F(IniParserTest, AddGetDeleteComment) {
+    IniParser parser;
+    parser.load("temp_test.ini");
+
+    // La chiave esiste, il commento no
+    EXPECT_EQ(parser.getCommentFromParam("general", "name"), "");
+
+    // Aggiungi un commento
+    parser.addCommentToParam("general", "name", "This is a name");
+    EXPECT_EQ(parser.getCommentFromParam("general", "name"), "This is a name");
+
+    // Prova ad aggiungere un commento a una chiave/sezione non esistente (non dovrebbe fare nulla o stampare errore)
+    parser.addCommentToParam("general", "nonexistentkey", "test");
+    EXPECT_EQ(parser.getCommentFromParam("general", "nonexistentkey"), "");
+    parser.addCommentToParam("nonexistentsection", "name", "test");
+    EXPECT_EQ(parser.getCommentFromParam("nonexistentsection", "name"), "");
+
+    // Sovrascrivi commento
+    parser.addCommentToParam("general", "name", "Updated name comment");
+    EXPECT_EQ(parser.getCommentFromParam("general", "name"), "Updated name comment");
+
+    // Elimina commento
+    EXPECT_TRUE(parser.deleteCommentFromParam("general", "name"));
+    EXPECT_EQ(parser.getCommentFromParam("general", "name"), "");
+
+    // Elimina commento non esistente
+    EXPECT_FALSE(parser.deleteCommentFromParam("general", "name"));
+    EXPECT_FALSE(parser.deleteCommentFromParam("general", "nonexistentkey"));
+    EXPECT_FALSE(parser.deleteCommentFromParam("nonexistentsection", "key"));
+}
+
+// Verifica toString() per un parser vuoto
+TEST_F(IniParserTest, ToStringEmptyParser) {
+    IniParser parser;
+    EXPECT_EQ(parser.toString(), "");
+}
+
+// Verifica toString() con dati e commenti
+TEST_F(IniParserTest, ToStringProgrammaticDataWithComments) {
+    IniParser parser;
+    parser.setValue("Settings", "Theme", "Dark");
+    // Assumendo che addCommentToParam funzioni come previsto
+    parser.addCommentToParam("Settings", "Theme", "User preferred color theme");
+    parser.setValue("Settings", "FontSize", "12");
+    parser.addCommentToParam("settings", "fontsize", "Font size in points"); // Case-insensitive
+
+    std::string expectedOutput =
+        "[settings]\n"
+        "; Font size in points\n" // I commenti vengono prima della chiave
+        "fontsize=12\n"
+        "; User preferred color theme\n"
+        "theme=Dark\n"
+        "\n";
+
+    EXPECT_EQ(parser.toString(), expectedOutput);
+}
+
+TEST_F(IniParserTest, AddCommentToNonExistentKeyOrSection) {
+    IniParser parser;
+    // Tentativo di aggiungere un commento a una chiave/sezione non esistente non dovrebbe avere effetto (o segnalare errore)
+    parser.addCommentToParam("nonExistentSection", "nonExistentKey", "A comment");
+    ASSERT_EQ(parser.getCommentFromParam("nonExistentSection", "nonExistentKey"), "");
+
+    parser.addSection("existingSection");
+    parser.addCommentToParam("existingSection", "nonExistentKeyInExistingSection", "Another comment");
+    ASSERT_EQ(parser.getCommentFromParam("existingSection", "nonExistentKeyInExistingSection"), "");
+}
+
+TEST_F(IniParserTest, DeleteKeyAlsoDeletesComment) {
+    IniParser parser;
+    parser.setValue("sectionForDelete", "keyToDelete", "value");
+    parser.addCommentToParam("sectionForDelete", "keyToDelete", "Comment for keyToDelete");
+    ASSERT_TRUE(parser.deleteKey("sectionForDelete", "keyToDelete"));
+    ASSERT_FALSE(parser.hasKey("sectionForDelete", "keyToDelete"));
+    ASSERT_EQ(parser.getCommentFromParam("sectionForDelete", "keyToDelete"), ""); // Il commento dovrebbe essere sparito
+}
+
+TEST_F(IniParserTest, DeleteSectionAlsoDeletesComments) {
+    IniParser parser;
+    parser.addSection("sectionWithComments");
+    parser.setValue("sectionWithComments", "key1", "value1");
+    parser.addCommentToParam("sectionWithComments", "key1", "Comment for key1 in sectionWithComments");
+    parser.setValue("sectionWithComments", "key2", "value2");
+    parser.addCommentToParam("sectionWithComments", "key2", "Comment for key2 in sectionWithComments");
+
+    ASSERT_TRUE(parser.deleteSection("sectionWithComments"));
+    ASSERT_FALSE(parser.hasSection("sectionWithComments"));
+    ASSERT_EQ(parser.getCommentFromParam("sectionWithComments", "key1"), ""); // Commento sparito
+    ASSERT_EQ(parser.getCommentFromParam("sectionWithComments", "key2"), ""); // Commento sparito
 }

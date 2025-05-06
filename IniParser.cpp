@@ -144,12 +144,12 @@ bool IniParser::save(const std::string& filename) const {
 
 
 std::string IniParser::getValue(const std::string& section, const std::string& key) const {
+    const std::string lowerSection = toLower(section);
+    const std::string lowerKey = toLower(key);
     // Controlla se la sezione esiste
-    if (const auto sectionIt = data.find(section); sectionIt != data.end()) {
-        // Si usa ->second per accedere al valore dall'iteratore (const correct)
+    if (const auto sectionIt = data.find(lowerSection); sectionIt != data.end()) { // Usa lowerSection
         const auto& innerMap = sectionIt->second;
-
-        if (const auto keyIt = innerMap.find(key); keyIt != innerMap.end()) {
+        if (const auto keyIt = innerMap.find(lowerKey); keyIt != innerMap.end()) { // Usa lowerKey
             return keyIt->second;
         }
     }
@@ -218,7 +218,7 @@ void IniParser::addCommentToParam(const std::string &section, const std::string&
     if (data.count(lowerSection) && data.at(lowerSection).count(lowerParam)) {
         paramComments[lowerSection][lowerParam] = comment;
     } else {
-        std::cerr << "Attenzione: sezinoe '" << section << "' o parametro '" << param << "' non trovati. Nessun commento aggiunto." << std::endl;
+        std::cerr << "Attenzione: sezione '" << section << "' o parametro '" << param << "' non trovati. Nessun commento aggiunto." << std::endl;
     }
 }
 
